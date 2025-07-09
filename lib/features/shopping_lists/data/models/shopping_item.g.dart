@@ -21,13 +21,16 @@ class ShoppingItemAdapter extends TypeAdapter<ShoppingItem> {
       listId: fields[1] as String,
       name: fields[2] as String,
       checked: fields[3] as bool,
+      status: ItemStatus.values.byName(
+        (fields[4] as String?) ?? ItemStatus.notCompleted.name,
+      ),
     );
   }
 
   @override
   void write(BinaryWriter writer, ShoppingItem obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -35,7 +38,9 @@ class ShoppingItemAdapter extends TypeAdapter<ShoppingItem> {
       ..writeByte(2)
       ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.checked);
+      ..write(obj.checked)
+      ..writeByte(4)
+      ..write(obj.status.name);
   }
 
   @override
