@@ -27,7 +27,7 @@ class ShoppingItem extends HiveObject {
     required this.listId,
     required this.name,
     this.checked = false,
-    this.status = ItemStatus.notCompleted,
+    this.status = ItemStatus.inProgress,
   });
 
   Map<String, dynamic> toMap() => {
@@ -44,7 +44,7 @@ class ShoppingItem extends HiveObject {
     name: map['name'],
     checked: map['checked'] ?? false,
     status: ItemStatus.values.byName(
-      map['status'] ?? ItemStatus.notCompleted.name,
+      map['status'] ?? ItemStatus.inProgress.name,
     ),
   );
 }

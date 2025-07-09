@@ -22,7 +22,7 @@ class ShoppingItemAdapter extends TypeAdapter<ShoppingItem> {
       name: fields[2] as String,
       checked: fields[3] as bool,
       status: ItemStatus.values.byName(
-        (fields[4] as String?) ?? ItemStatus.notCompleted.name,
+        (fields[4] as String?) ?? ItemStatus.inProgress.name,
       ),
     );
   }

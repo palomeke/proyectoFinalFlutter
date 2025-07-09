@@ -12,6 +12,17 @@ class ItemListScreen extends ConsumerWidget {
   final ShoppingList list;
   const ItemListScreen({super.key, required this.list});
 
+  Color _statusColor(ItemStatus status) {
+    switch (status) {
+      case ItemStatus.inProgress:
+        return Colors.yellow;
+      case ItemStatus.completed:
+        return Colors.green;
+      case ItemStatus.notCompleted:
+        return Colors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(shoppingRepositoryProvider);
@@ -41,6 +52,7 @@ class ItemListScreen extends ConsumerWidget {
                       id: const Uuid().v4(),
                       listId: list.id,
                       name: controller.text.trim(),
+                      status: ItemStatus.inProgress,
                     );
                     await repo.addItem(newItem);
                     controller.clear();
@@ -66,33 +78,48 @@ class ItemListScreen extends ConsumerWidget {
                     final item = listItems[index];
                     return ListTile(
                       title: Text(item.name),
-                      leading: DropdownButton<ItemStatus>(
-                        value: item.status,
-                        onChanged: (value) async {
-                          if (value != null) {
-                            await repo.updateItemStatus(
-                              item.listId,
-                              item.id,
-                              value,
-                            );
-                          }
-                        },
-                        items: const [
-                          DropdownMenuItem(
-                            value: ItemStatus.notCompleted,
-                            child: Text('No completado'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton<ItemStatus>(
+                              value: item.status,
+                              onChanged: item.status == ItemStatus.completed
+                                  ? null
+                                  : (value) async {
+                                      if (value != null) {
+                                        await repo.updateItemStatus(
+                                          item.listId,
+                                          item.id,
+                                          value,
+                                        );
+                                      }
+                                    },
+                              items: const [
+                                DropdownMenuItem(
+                                  value: ItemStatus.notCompleted,
+                                  child: Text('No completado'),
+                                ),
+                                DropdownMenuItem(
+                                  value: ItemStatus.inProgress,
+                                  child: Text('En proceso'),
+                                ),
+                                DropdownMenuItem(
+                                  value: ItemStatus.completed,
+                                  child: Text('Completado'),
+                                ),
+                              ],
+                              icon: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: _statusColor(item.status),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ),
-                          DropdownMenuItem(
-                            value: ItemStatus.inProgress,
-                            child: Text('En proceso'),
-                          ),
-                          DropdownMenuItem(
-                            value: ItemStatus.completed,
-                            child: Text('Completado'),
-                          ),
-                        ],
-                      ),
-                      trailing: PopupMenuButton<String>(
+                          PopupMenuButton<String>(
                         onSelected: (value) async {
                           if (value == 'edit') {
                             final controller = TextEditingController(text: item.name);
