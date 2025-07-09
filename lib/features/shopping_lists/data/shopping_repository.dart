@@ -66,7 +66,9 @@ class ShoppingRepository {
       final serverItem = ShoppingItem.fromMap(doc.data());
       final localItem = itemBox.get(serverItem.id);
 
-      if (localItem == null || localItem.checked != serverItem.checked) {
+      if (localItem == null ||
+          localItem.status != serverItem.status ||
+          localItem.name != serverItem.name) {
         await itemBox.put(serverItem.id, serverItem);
       }
     }
@@ -169,10 +171,10 @@ class ShoppingRepository {
         );
   }
 
-  Future<void> updateItemCheck(
+  Future<void> updateItemStatus(
     String listId,
     String itemId,
-    bool checked,
+    ItemStatus status,
   ) async {
     final item = itemBox.get(itemId);
     if (item == null) return;
@@ -181,7 +183,8 @@ class ShoppingRepository {
       id: item.id,
       listId: item.listId,
       name: item.name,
-      checked: checked,
+      checked: item.checked,
+      status: status,
     );
 
     await itemBox.put(itemId, updated);
@@ -192,9 +195,53 @@ class ShoppingRepository {
           .doc(listId)
           .collection('items')
           .doc(itemId)
-          .update({'checked': checked});
+          .update({'status': status.name});
     } catch (e) {
       debugPrint('Fallo al actualizar estado en Firestore: $e');
+    }
+  }
+
+  Future<void> updateItemName(
+    String listId,
+    String itemId,
+    String newName,
+  ) async {
+    final item = itemBox.get(itemId);
+    if (item == null) return;
+
+    final updated = ShoppingItem(
+      id: item.id,
+      listId: item.listId,
+      name: newName,
+      checked: item.checked,
+      status: item.status,
+    );
+
+    await itemBox.put(itemId, updated);
+
+    try {
+      await firestore
+          .collection('shopping_lists')
+          .doc(listId)
+          .collection('items')
+          .doc(itemId)
+          .update({'name': newName});
+    } catch (e) {
+      debugPrint('Fallo al actualizar nombre en Firestore: $e');
+    }
+  }
+
+  Future<void> deleteItem(String listId, String itemId) async {
+    await itemBox.delete(itemId);
+    try {
+      await firestore
+          .collection('shopping_lists')
+          .doc(listId)
+          .collection('items')
+          .doc(itemId)
+          .delete();
+    } catch (e) {
+      debugPrint('Fallo al eliminar item en Firestore: $e');
     }
   }
 }

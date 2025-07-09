@@ -1,6 +1,8 @@
 // lib/features/shopping_lists/data/models/shopping_item.dart
 import 'package:hive/hive.dart';
 
+enum ItemStatus { notCompleted, inProgress, completed }
+
 part 'shopping_item.g.dart';
 
 @HiveType(typeId: 1)
@@ -17,11 +19,15 @@ class ShoppingItem extends HiveObject {
   @HiveField(3)
   final bool checked;
 
+  @HiveField(4)
+  final ItemStatus status;
+
   ShoppingItem({
     required this.id,
     required this.listId,
     required this.name,
     this.checked = false,
+    this.status = ItemStatus.inProgress,
   });
 
   Map<String, dynamic> toMap() => {
@@ -29,6 +35,7 @@ class ShoppingItem extends HiveObject {
     'listId': listId,
     'name': name,
     'checked': checked,
+    'status': status.name,
   };
 
   factory ShoppingItem.fromMap(Map<String, dynamic> map) => ShoppingItem(
@@ -36,5 +43,8 @@ class ShoppingItem extends HiveObject {
     listId: map['listId'],
     name: map['name'],
     checked: map['checked'] ?? false,
+    status: ItemStatus.values.byName(
+      map['status'] ?? ItemStatus.inProgress.name,
+    ),
   );
 }

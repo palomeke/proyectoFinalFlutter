@@ -94,17 +94,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   itemCount: lists.length,
                   itemBuilder: (_, index) {
                     final list = lists[index];
-                    return ListTile(
-                      title: Text(list.name),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ItemListScreen(list: list),
-                          ),
-                        );
-                      },
-                      trailing: PopupMenuButton<String>(
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          list.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ItemListScreen(list: list),
+                            ),
+                          );
+                        },
+                        trailing: PopupMenuButton<String>(
                         onSelected: (value) async {
                           if (value == 'edit') {
                             final newNameController = TextEditingController(
